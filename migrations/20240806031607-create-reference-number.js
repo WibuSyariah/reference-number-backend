@@ -26,6 +26,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING,
       },
+      companyCode: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
       month: {
         allowNull: false,
         type: Sequelize.INTEGER,
