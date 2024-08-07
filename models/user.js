@@ -1,7 +1,8 @@
 "use strict";
 const { Model } = require("sequelize");
+const { hashPassword } = require("../helpers/bcrypt");
 module.exports = (sequelize, DataTypes) => {
-  class ReferenceNumber extends Model {
+  class User extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,42 +12,37 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  ReferenceNumber.init(
+  User.init(
     {
-      referenceNumber: {
+      username: {
         allowNull: false,
+        type: DataTypes.STRING,
         unique: true,
-        type: DataTypes.STRING,
       },
-      applicantName: {
+      password: {
         allowNull: false,
         type: DataTypes.STRING,
       },
-      division: {
+      role: {
         allowNull: false,
         type: DataTypes.STRING,
-      },
-      addressedTo: {
-        allowNull: false,
-        type: DataTypes.STRING,
-      },
-      companyCode: {
-        allowNull: false,
-        type: DataTypes.STRING,
-      },
-      month: {
-        allowNull: false,
-        type: DataTypes.INTEGER,
-      },
-      year: {
-        allowNull: false,
-        type: DataTypes.INTEGER,
+        defaultValue: "USER",
       },
     },
     {
       sequelize,
-      modelName: "ReferenceNumber",
+      modelName: "User",
+      hooks: {
+        beforeCreate(instance, options) {
+          instance.password = hashPassword(instance.password);
+        },
+        beforeUpdate(instance, options) {
+          if (instance.password) {
+            instance.password = hashPassword(instance.password);
+          }
+        },
+      },
     },
   );
-  return ReferenceNumber;
+  return User;
 };

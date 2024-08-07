@@ -8,7 +8,7 @@ class ReferenceNumberController {
       const { applicantName, division, addressedTo, companyCode } = req.body;
 
       const currentYear = new Date().getFullYear();
-      const currentMonth = new Date().getMonth() + 1;
+      const currentMonth = new Date().getMonth() + 1; 
       const romanNumeralMonth = toRoman(currentMonth);
 
       const lastReferenceNumber = await ReferenceNumber.findOne({
@@ -43,7 +43,7 @@ class ReferenceNumberController {
 
       await transaction.commit();
       res.status(201).json({
-        message: "Reference Number Generated",
+        message: "Reference Number generated",
         data: {
           referenceNumber,
         },
