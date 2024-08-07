@@ -22,6 +22,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING,
       },
+      letterSubject: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
       addressedTo: {
         allowNull: false,
         type: Sequelize.STRING,

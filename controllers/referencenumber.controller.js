@@ -5,7 +5,7 @@ class ReferenceNumberController {
   static async generate(req, res, next) {
     const transaction = await sequelize.transaction();
     try {
-      const { applicantName, division, addressedTo, companyCode } = req.body;
+      const { applicantName, division, letterSubject, addressedTo, companyCode } = req.body;
 
       const currentYear = new Date().getFullYear();
       const currentMonth = new Date().getMonth() + 1; 
@@ -34,6 +34,7 @@ class ReferenceNumberController {
       const newReferenceNumber = await ReferenceNumber.create({
         applicantName,
         division,
+        letterSubject,
         addressedTo,
         referenceNumber,
         companyCode,

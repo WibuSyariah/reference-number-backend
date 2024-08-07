@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.STRING,
       },
+      letterSubject: {
+        allowNull: false,
+        type: DataTypes.STRING,
+      },
       addressedTo: {
         allowNull: false,
         type: DataTypes.STRING,
