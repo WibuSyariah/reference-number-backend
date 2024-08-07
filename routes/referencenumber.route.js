@@ -5,5 +5,6 @@ const ReferenceNumberController = require("../controllers/referencenumber.contro
 
 router.use(authentication)
 router.post("/generate", ReferenceNumberController.generate)
+router.get("", ReferenceNumberController.readAll)
 
 module.exports = router

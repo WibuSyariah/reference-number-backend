@@ -53,6 +53,23 @@ class ReferenceNumberController {
       next(error);
     }
   }
+
+  static async readAll(req, res, next) {
+    try {
+      const referenceNumber = await ReferenceNumber.findAll({
+        limit: 20
+      })
+
+      res.status(200).json({
+        message: "Reference Number list",
+        data: {
+          referenceNumber
+        }
+      });
+    } catch (error) {
+      next(error)
+    }
+  }
 }
 
 module.exports = ReferenceNumberController;
