@@ -1,14 +1,20 @@
 const { ReferenceNumber, sequelize } = require("../models");
-const { toRoman } = require("@javascript-packages/roman-numerals")
-
+const { toRoman } = require("@javascript-packages/roman-numerals");
+const { Op, fn, col } = require("sequelize");
 class ReferenceNumberController {
   static async generate(req, res, next) {
     const transaction = await sequelize.transaction();
     try {
-      const { applicantName, division, letterSubject, addressedTo, companyCode } = req.body;
+      const {
+        applicantName,
+        division,
+        letterSubject,
+        addressedTo,
+        companyCode,
+      } = req.body;
 
       const currentYear = new Date().getFullYear();
-      const currentMonth = new Date().getMonth() + 1; 
+      const currentMonth = new Date().getMonth() + 1;
       const romanNumeralMonth = toRoman(currentMonth);
 
       const lastReferenceNumber = await ReferenceNumber.findOne({
@@ -57,18 +63,33 @@ class ReferenceNumberController {
 
   static async readAll(req, res, next) {
     try {
-      const referenceNumber = await ReferenceNumber.findAll({
-        limit: 20
-      })
+      const { startDate, endDate, limit } = req.query;
+
+      let options = {
+        limit: limit ? parseInt(limit) : 20,
+      };
+
+      if (startDate && endDate) {
+        options.where = {
+          createdAt: {
+            [Op.between]: [
+              `${startDate} 00:00:00`,
+              `${endDate} 23:59:59`,
+            ],
+          },
+        };
+      }
+
+      const referenceNumber = await ReferenceNumber.findAll(options);
 
       res.status(200).json({
         message: "Reference Number list",
         data: {
-          referenceNumber
-        }
+          referenceNumber,
+        },
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

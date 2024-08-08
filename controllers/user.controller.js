@@ -1,8 +1,8 @@
 const { User } = require("../models");
 const { payloadToToken } = require("../helpers/jwt");
 const AppError = require("../helpers/appError");
-const { omit } = require('lodash');
-const { comparePassword } = require("../helpers/bcrypt");
+const { omit } = require("lodash");
+const { comparePassword, hashPassword } = require("../helpers/bcrypt");
 
 class UserController {
   static async create(req, res, next) {
@@ -21,29 +21,64 @@ class UserController {
 
   static async login(req, res, next) {
     try {
-      const { username, password } = req.body
+      const { username, password } = req.body;
 
       let user = await User.findOne({
         where: { username },
-        attributes: ["id", "username", "role", "password"]
+        attributes: ["id", "username", "role", "password"],
       });
-      
+
       if (!user || !password) {
         throw new AppError("Wrong username or password", 401);
       }
 
       if (!(await comparePassword(password, user.password))) {
-        throw new AppError('Wrong username or password', 401)
+        throw new AppError("Wrong username or password", 401);
       }
-      
-      user = omit(user.get(), ['password']),
-      
+
+      user = omit(user.get(), ["password"]);
+
+      const accessToken = payloadToToken(user);
+
       res.status(200).json({
         message: "Login success",
-        accessToken: payloadToToken(user)
+        data: {
+          accessToken,
+          role: user.role,
+        },
       });
     } catch (error) {
-    next(error);
+      next(error);
+    }
+  }
+
+  static async changePassword(req, res, next) {
+    try {
+      const { id } = req.user;
+      const { newPassword, confirmPassword } = req.body;
+
+      if (newPassword !== confirmPassword) {
+        throw new AppError("Passwords do not match", 400);
+      }
+
+      const hashedPassword = hashPassword(newPassword);
+
+      await User.update(
+        {
+          password: hashedPassword,
+        },
+        {
+          where: {
+            id,
+          },
+        },
+      );
+
+      res.status(200).json({
+        message: "Password changed",
+      });
+    } catch (error) {
+      next(error);
     }
   }
 }

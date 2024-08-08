@@ -10,12 +10,9 @@ const authentication = async (req, res, next) => {
     req.headers.authorization.startsWith("Bearer")
   ) {
     try {
-      // console.log(req.headers.authorization, "ini dia")
       token = req.headers.authorization.split(" ")[1];
-      // console.log(token, "ini token")
 
       const decoded = tokenToPayload(token);
-      console.log(decoded, "ini decod")
 
       req.user = await User.findOne({
         logging: false,
