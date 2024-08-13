@@ -18,19 +18,11 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING,
       },
-      division: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
       letterSubject: {
         allowNull: false,
         type: Sequelize.STRING,
       },
       addressedTo: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
-      companyCode: {
         allowNull: false,
         type: Sequelize.STRING,
       },
@@ -41,6 +33,30 @@ module.exports = {
       year: {
         allowNull: false,
         type: Sequelize.INTEGER,
+      },
+      userId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: { tableName: "Users" },
+          key: "id",
+        },
+      },
+      companyId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: { tableName: "Companies" },
+          key: "id",
+        },
+      },
+      divisionId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: { tableName: "Divisions" },
+          key: "id",
+        },
       },
       createdAt: {
         allowNull: false,

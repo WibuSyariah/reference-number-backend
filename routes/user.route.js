@@ -7,9 +7,10 @@ const UserController = require("../controllers/user.controller");
 router.post("/login", UserController.login);
 
 router.use(authentication);
-router.patch("/password", UserController.changePassword);
+router.put("/", UserController.update);
 
 router.use(authorization);
-router.post("/register", UserController.create);
+router.post("", UserController.create);
+router.get("", UserController.readAll);
 
 module.exports = router;

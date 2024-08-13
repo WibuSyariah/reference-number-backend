@@ -37,4 +37,4 @@ const authentication = async (req, res, next) => {
   return next(new AppError(`Token Required`, 401));
 };
 
-module.exports = authentication
+module.exports = authentication;

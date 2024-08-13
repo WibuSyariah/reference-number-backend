@@ -8,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      this.belongsTo(models.Company, { foreignKey: "companyId" });
+      this.belongsTo(models.Division, { foreignKey: "divisionId" });
     }
   }
   ReferenceNumber.init(
@@ -22,10 +23,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.STRING,
       },
-      division: {
-        allowNull: false,
-        type: DataTypes.STRING,
-      },
       letterSubject: {
         allowNull: false,
         type: DataTypes.STRING,
@@ -34,15 +31,23 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.STRING,
       },
-      companyCode: {
-        allowNull: false,
-        type: DataTypes.STRING,
-      },
       month: {
         allowNull: false,
         type: DataTypes.INTEGER,
       },
       year: {
+        allowNull: false,
+        type: DataTypes.INTEGER,
+      },
+      userId: {
+        allowNull: false,
+        type: DataTypes.INTEGER,
+      },
+      companyId: {
+        allowNull: false,
+        type: DataTypes.INTEGER,
+      },
+      divisionId: {
         allowNull: false,
         type: DataTypes.INTEGER,
       },

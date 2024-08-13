@@ -1,10 +1,18 @@
 const express = require("express");
 const router = express.Router();
+const authentication = require("../middlewares/authentication");
+const authorization = require("../middlewares/authorization");
 
-const referenceNumber = require("./referencenumber.route")
-const user = require("./user.route")
+const company = require("./company.route");
+const division = require("./division.route");
+const user = require("./user.route");
+const referenceNumber = require("./referencenumber.route");
 
-router.use("/reference-number", referenceNumber)
-router.use("/user", user)
+router.use("/user", user);
+router.use("/reference-number", referenceNumber);
 
-module.exports = router
+router.use(authentication, authorization);
+router.use("/company", company);
+router.use("/division", division);
+
+module.exports = router;
