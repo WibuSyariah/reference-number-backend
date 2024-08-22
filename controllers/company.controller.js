@@ -12,17 +12,23 @@ class CompanyController {
         message: "Company created",
       });
     } catch (error) {
+      if (error.name === "SequelizeUniqueConstraintError") {
+        next(new AppError(`Name or code already used`, 400));
+      }
+
       next(error);
     }
   }
 
   static async readAll(req, res, next) {
     try {
-      const { limit, page } = req.query;
+      const { limit, currentPage } = req.query;
 
       let options = {
         limit: limit ? Number(limit) : 20,
-        offset: (Number(page ? page : 1) - 1) * (limit ? Number(limit) : 20),
+        offset:
+          (Number(currentPage ? currentPage : 1) - 1) *
+          (limit ? Number(limit) : 20),
       };
 
       const companies = await Company.findAndCountAll(options);
@@ -32,7 +38,7 @@ class CompanyController {
         data: {
           companies: companies.rows,
           totalPages: Math.ceil(companies.count / Number(limit)),
-          currentPage: Number(page),
+          currentPage: Number(currentPage),
         },
       });
     } catch (error) {
@@ -44,13 +50,13 @@ class CompanyController {
     try {
       const { id } = req.params;
 
-      const company = await Company.findByPk(id)
+      const company = await Company.findByPk(id);
 
       if (!company) {
         throw new AppError("Company not found", 404);
       }
 
-      company.destroy()
+      company.destroy();
 
       res.status(200).json({
         message: "Company deleted",

@@ -12,17 +12,20 @@ class DivisionController {
         message: "Division created",
       });
     } catch (error) {
+      if (error.name === "SequelizeUniqueConstraintError") {
+        next(new AppError(`Name or code already used`, 400));
+      }
       next(error);
     }
   }
 
   static async readAll(req, res, next) {
     try {
-      const { limit, page } = req.query;
+      const { limit, currentPage } = req.query;
 
       let options = {
         limit: limit ? Number(limit) : 20,
-        offset: (Number(page ? page : 1) - 1) * (limit ? Number(limit) : 20),
+        offset: (Number(currentPage ? currentPage : 1) - 1) * (limit ? Number(limit) : 20),
       };
 
       const divisions = await Division.findAndCountAll(options);
@@ -32,7 +35,7 @@ class DivisionController {
         data: {
           divisions: divisions.rows,
           totalPages: Math.ceil(divisions.count / Number(limit)),
-          currentPage: Number(page),
+          currentPage: Number(currentPage),
         },
       });
     } catch (error) {

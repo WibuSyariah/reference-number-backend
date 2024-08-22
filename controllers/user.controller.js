@@ -22,7 +22,7 @@ class UserController {
 
   static async readAll(req, res, next) {
     try {
-      const { search, limit, page } = req.query;
+      const { search, limit, currentPage } = req.query;
 
       let condition = {
         where: {
@@ -44,7 +44,13 @@ class UserController {
             : {}),
         },
         limit: limit ? Number(limit) : 20,
-        offset: (Number(page ? page : 1) - 1) * (limit ? Number(limit) : 20),
+        offset:
+          (Number(currentPage ? currentPage : 1) - 1) *
+          (limit ? Number(limit) : 20),
+        attributes: {
+          exclude: ["password"],
+        },
+        order: [["id", "ASC"]],
       };
 
       const users = await User.findAndCountAll(condition);
@@ -54,7 +60,7 @@ class UserController {
         data: {
           users: users.rows,
           totalPages: Math.ceil(users.count / Number(limit)),
-          currentPage: Number(page),
+          currentPage: Number(currentPage),
         },
       });
     } catch (error) {
@@ -65,18 +71,31 @@ class UserController {
   static async update(req, res, next) {
     try {
       const { id } = req.params;
-      const { fullName } = req.body;
+      const { fullName, newPassword, confirmPassword } = req.body;
+      let hashedPassword = "";
+      let updateData = {
+        ...(fullName
+          ? {
+              fullName,
+            }
+          : {}),
+      };
 
-      await User.update(
-        {
-          fullName,
+      if (newPassword || confirmPassword) {
+        if (newPassword !== confirmPassword) {
+          throw new AppError("Passwords do not match", 400);
+        } else {
+          hashedPassword = hashPassword(newPassword);
+
+          updateData.password = hashedPassword;
+        }
+      }
+
+      await User.update(updateData, {
+        where: {
+          id,
         },
-        {
-          where: {
-            id,
-          },
-        },
-      );
+      });
 
       res.status(200).json({
         message: "User updated",

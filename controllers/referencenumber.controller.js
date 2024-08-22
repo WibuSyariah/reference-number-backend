@@ -3,7 +3,6 @@ const { toRoman } = require("@javascript-packages/roman-numerals");
 const { Op } = require("sequelize");
 const AppError = require("../helpers/appError");
 
-
 class ReferenceNumberController {
   static async generate(req, res, next) {
     const transaction = await sequelize.transaction();
@@ -34,7 +33,6 @@ class ReferenceNumberController {
       const currentMonth = new Date().getMonth() + 1;
       const romanNumeralMonth = toRoman(currentMonth);
 
-
       const lastReferenceNumber = await ReferenceNumber.findOne({
         where: {
           companyId,
@@ -44,9 +42,6 @@ class ReferenceNumberController {
         order: [["id", "DESC"]],
         transaction,
       });
-
-      console.log("masuk 1");
-      
 
       let nextNumber = 1;
       if (lastReferenceNumber) {
@@ -89,7 +84,8 @@ class ReferenceNumberController {
 
   static async readAll(req, res, next) {
     try {
-      const { startDate, endDate, limit, page } = req.query;
+      const { limit, currentPage, startDate, endDate, companyId, divisionId } =
+        req.query;
 
       let options = {
         where: {
@@ -103,10 +99,26 @@ class ReferenceNumberController {
                 },
               }
             : {}),
+          ...(companyId
+            ? {
+                companyId,
+              }
+            : {}),
+          ...(divisionId
+            ? {
+                divisionId,
+              }
+            : {}),
         },
         limit: limit ? Number(limit) : 20,
-        offset: (Number(page ? page : 1) - 1) * (limit ? Number(limit) : 20),
+        offset: (Number(currentPage ? currentPage : 1) - 1) * (limit ? Number(limit) : 20),
         order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Division,
+            attributes: ["name"],
+          },
+        ],
       };
 
       const referenceNumber = await ReferenceNumber.findAndCountAll(options);
@@ -116,7 +128,7 @@ class ReferenceNumberController {
         data: {
           referenceNumbers: referenceNumber.rows,
           totalPages: Math.ceil(referenceNumber.count / Number(limit)),
-          currentPage: Number(page),
+          currentPage: Number(currentPage),
         },
       });
     } catch (error) {
