@@ -13,9 +13,13 @@ class UserController {
       });
 
       res.status(201).json({
-        message: "User created",
+        message: "Pengguna dibuat",
       });
     } catch (error) {
+      if (error.name === "SequelizeUniqueConstraintError") {
+        next(new AppError(`Nama pengguna sudah digunakan`, 400));
+      }
+
       next(error);
     }
   }
@@ -56,7 +60,7 @@ class UserController {
       const users = await User.findAndCountAll(condition);
 
       res.status(200).json({
-        message: "User list",
+        message: "Daftar pengguna",
         data: {
           users: users.rows,
           totalPages: Math.ceil(users.count / Number(limit)),
@@ -83,7 +87,7 @@ class UserController {
 
       if (newPassword || confirmPassword) {
         if (newPassword !== confirmPassword) {
-          throw new AppError("Passwords do not match", 400);
+          throw new AppError("Kata sandi tidak cocok", 400);
         } else {
           hashedPassword = hashPassword(newPassword);
 
@@ -98,7 +102,7 @@ class UserController {
       });
 
       res.status(200).json({
-        message: "User updated",
+        message: "Pengguna diperbarui",
       });
     } catch (error) {
       next(error);
@@ -111,7 +115,7 @@ class UserController {
       const { newPassword, confirmPassword } = req.body;
 
       if (newPassword !== confirmPassword) {
-        throw new AppError("Passwords do not match", 400);
+        throw new AppError("Kata sandi tidak cocok", 400);
       }
 
       const hashedPassword = hashPassword(newPassword);
@@ -128,7 +132,7 @@ class UserController {
       );
 
       res.status(200).json({
-        message: "Password changed",
+        message: "Kata sandi diganti",
       });
     } catch (error) {
       next(error);
@@ -142,13 +146,13 @@ class UserController {
       const user = await User.findByPk(id);
 
       if (!user) {
-        throw new AppError("User not found", 404);
+        throw new AppError("Pengguna tidak ditemukan", 404);
       }
 
       user.destroy();
-
+      
       res.status(200).json({
-        message: "User deleted",
+        message: "Pengguna dihapus",
       });
     } catch (error) {
       next(error);
@@ -165,11 +169,11 @@ class UserController {
       });
 
       if (!user || !password) {
-        throw new AppError("Wrong username or password", 401);
+        throw new AppError("Nama pengguna atau kata sandi salah", 401);
       }
 
       if (!(await comparePassword(password, user.password))) {
-        throw new AppError("Wrong username or password", 401);
+        throw new AppError("Nama pengguna atau kata sandi salah", 401);
       }
 
       user = omit(user.get(), ["password"]);
@@ -177,7 +181,7 @@ class UserController {
       const accessToken = payloadToToken(user);
 
       res.status(200).json({
-        message: "Login success",
+        message: "Berhasil masuk",
         data: {
           accessToken,
           role: user.role,

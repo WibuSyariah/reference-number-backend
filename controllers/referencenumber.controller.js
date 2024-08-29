@@ -18,13 +18,13 @@ class ReferenceNumberController {
       const company = await Company.findByPk(companyId);
 
       if (!company) {
-        throw new AppError("Company not found", 404);
+        throw new AppError("Perusahaan tidak ditemukan", 404);
       }
 
       const division = await Division.findByPk(divisionId);
 
       if (!division) {
-        throw new AppError("Division not found", 404);
+        throw new AppError("Divisi tidak ditemukan", 404);
       }
 
       const userId = req.user.id;
@@ -71,7 +71,7 @@ class ReferenceNumberController {
 
       await transaction.commit();
       res.status(201).json({
-        message: "Reference Number generated",
+        message: "Nomor surat dibuat",
         data: {
           referenceNumber,
         },
@@ -86,9 +86,11 @@ class ReferenceNumberController {
     try {
       const { limit, currentPage, startDate, endDate, companyId, divisionId } =
         req.query;
+      const currentYear = new Date().getFullYear();
 
       let options = {
         where: {
+          year: currentYear,
           ...(startDate && endDate
             ? {
                 createdAt: {
@@ -111,7 +113,9 @@ class ReferenceNumberController {
             : {}),
         },
         limit: limit ? Number(limit) : 20,
-        offset: (Number(currentPage ? currentPage : 1) - 1) * (limit ? Number(limit) : 20),
+        offset:
+          (Number(currentPage ? currentPage : 1) - 1) *
+          (limit ? Number(limit) : 20),
         order: [["createdAt", "DESC"]],
         include: [
           {
@@ -124,7 +128,69 @@ class ReferenceNumberController {
       const referenceNumber = await ReferenceNumber.findAndCountAll(options);
 
       res.status(200).json({
-        message: "Reference Number list",
+        message: "Daftar nomor surat",
+        data: {
+          referenceNumbers: referenceNumber.rows,
+          totalPages: Math.ceil(referenceNumber.count / Number(limit)),
+          currentPage: Number(currentPage),
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async readArchive(req, res, next) {
+    try {
+      const { limit, currentPage, startDate, endDate, companyId, divisionId, year } =
+        req.query;
+      const currentYear = new Date().getFullYear();
+
+      let options = {
+        where: {
+          ...(year
+            ? {
+                year: year
+              }
+            : { year: currentYear - 1}),
+          ...(startDate && endDate
+            ? {
+                createdAt: {
+                  [Op.between]: [
+                    `${startDate} 00:00:00`,
+                    `${endDate} 23:59:59`,
+                  ],
+                },
+              }
+            : {}),
+          ...(companyId
+            ? {
+                companyId,
+              }
+            : {}),
+          ...(divisionId
+            ? {
+                divisionId,
+              }
+            : {}),
+        },
+        limit: limit ? Number(limit) : 20,
+        offset:
+          (Number(currentPage ? currentPage : 1) - 1) *
+          (limit ? Number(limit) : 20),
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Division,
+            attributes: ["name"],
+          },
+        ],
+      };
+
+      const referenceNumber = await ReferenceNumber.findAndCountAll(options);
+
+      res.status(200).json({
+        message: "Arsip nomor surat",
         data: {
           referenceNumbers: referenceNumber.rows,
           totalPages: Math.ceil(referenceNumber.count / Number(limit)),

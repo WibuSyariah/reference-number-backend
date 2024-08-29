@@ -9,11 +9,11 @@ class DivisionController {
       });
 
       res.status(201).json({
-        message: "Division created",
+        message: "Divisi dibuat",
       });
     } catch (error) {
       if (error.name === "SequelizeUniqueConstraintError") {
-        next(new AppError(`Name or code already used`, 400));
+        next(new AppError(`Nama atau kode sudah digunakan`, 400));
       }
       next(error);
     }
@@ -25,13 +25,15 @@ class DivisionController {
 
       let options = {
         limit: limit ? Number(limit) : 20,
-        offset: (Number(currentPage ? currentPage : 1) - 1) * (limit ? Number(limit) : 20),
+        offset:
+          (Number(currentPage ? currentPage : 1) - 1) *
+          (limit ? Number(limit) : 20),
       };
 
       const divisions = await Division.findAndCountAll(options);
 
       res.status(200).json({
-        message: "Division list",
+        message: "Daftar divisi",
         data: {
           divisions: divisions.rows,
           totalPages: Math.ceil(divisions.count / Number(limit)),
@@ -50,13 +52,13 @@ class DivisionController {
       const division = await Division.findByPk(id);
 
       if (!division) {
-        throw new AppError("Division not found", 404);
+        throw new AppError("Divisi tidak ditemukan", 404);
       }
 
       division.destroy();
 
       res.status(200).json({
-        message: "Division deleted",
+        message: "Divisi dihapus",
       });
     } catch (error) {
       next(error);

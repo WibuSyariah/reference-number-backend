@@ -9,11 +9,11 @@ class CompanyController {
       });
 
       res.status(201).json({
-        message: "Company created",
+        message: "Perusahaan dibuat",
       });
     } catch (error) {
       if (error.name === "SequelizeUniqueConstraintError") {
-        next(new AppError(`Name or code already used`, 400));
+        next(new AppError(`Nama atau kode sudah digunakan`, 400));
       }
 
       next(error);
@@ -34,7 +34,7 @@ class CompanyController {
       const companies = await Company.findAndCountAll(options);
 
       res.status(200).json({
-        message: "Company list",
+        message: "Daftar perusaahaan",
         data: {
           companies: companies.rows,
           totalPages: Math.ceil(companies.count / Number(limit)),
@@ -53,13 +53,13 @@ class CompanyController {
       const company = await Company.findByPk(id);
 
       if (!company) {
-        throw new AppError("Company not found", 404);
+        throw new AppError("Perusahaan tidak ditemukan", 404);
       }
 
       company.destroy();
 
       res.status(200).json({
-        message: "Company deleted",
+        message: "Perusahaan dihapus",
       });
     } catch (error) {
       next(error);

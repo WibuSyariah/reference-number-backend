@@ -4,5 +4,6 @@ const ReferenceNumberController = require("../controllers/referencenumber.contro
 
 router.post("", ReferenceNumberController.generate);
 router.get("", ReferenceNumberController.readAll);
+router.get("/archive", ReferenceNumberController.readArchive)
 
 module.exports = router;
