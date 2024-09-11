@@ -2,6 +2,10 @@ const { ReferenceNumber, Company, Division, sequelize } = require("../models");
 const { toRoman } = require("@javascript-packages/roman-numerals");
 const { Op } = require("sequelize");
 const AppError = require("../helpers/appError");
+const docxtemplater = require("docxtemplater");
+const PizZip = require("pizzip");
+const fs = require("node:fs");
+const path = require("node:path")
 
 class ReferenceNumberController {
   static async generate(req, res, next) {
@@ -51,7 +55,7 @@ class ReferenceNumberController {
       }
 
       const paddedNumber = nextNumber.toString().padStart(3, "0");
-      const referenceNumber = `${paddedNumber}/${division.code}.${company.code}/${romanNumeralMonth}/${currentYear}`;
+      const referenceNumber = `${paddedNumber}/${division.code}/${company.code}-JKT/${romanNumeralMonth}/${currentYear}`;
 
       // Create a new reference number record
       const newReferenceNumber = await ReferenceNumber.create(
@@ -140,29 +144,40 @@ class ReferenceNumberController {
     }
   }
 
+  static async readYears(req, res, next) {
+    try {
+      const years = await ReferenceNumber.findAll({
+        attributes: ["year"],
+        group: ["year"],
+        order: [["year", "DESC"]],
+        offset: 1,
+      });
+
+      res.status(200).json({
+        message: "Tahun-tahun nomor surat",
+        data: {
+          years,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async readArchive(req, res, next) {
     try {
-      const { limit, currentPage, startDate, endDate, companyId, divisionId, year } =
-        req.query;
+      const { limit, currentPage, companyId, divisionId, year } = req.query;
+
       const currentYear = new Date().getFullYear();
 
       let options = {
         where: {
           ...(year
             ? {
-                year: year
+                year: year,
               }
-            : { year: currentYear - 1}),
-          ...(startDate && endDate
-            ? {
-                createdAt: {
-                  [Op.between]: [
-                    `${startDate} 00:00:00`,
-                    `${endDate} 23:59:59`,
-                  ],
-                },
-              }
-            : {}),
+            : { year: currentYear - 1 }),
+
           ...(companyId
             ? {
                 companyId,
@@ -197,6 +212,46 @@ class ReferenceNumberController {
           currentPage: Number(currentPage),
         },
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async generateDocument(req, res, next) {
+    try {
+      const { last_name, first_name, phone, description } = req.body;
+
+      const content = fs.readFileSync(
+        path.join(__dirname, "../templates/input.docx"),
+        "binary",
+      );
+
+      const zip = new PizZip(content);
+
+      const doc = new docxtemplater(zip, {
+        paragraphLoop: true,
+        linebreaks: true,
+      });
+
+      doc.render({
+        first_name,
+        last_name,
+        phone,
+        description,
+      });
+
+      const buf = doc.getZip().generate({
+        type: "nodebuffer",
+        compression: "DEFLATE",
+      });
+
+      res.set({
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "Content-Disposition": 'attachment; filename="generated_document.docx"',
+      });
+
+      res.send(buf);
     } catch (error) {
       next(error);
     }

@@ -8,7 +8,7 @@ module.exports = {
     await queryInterface.bulkInsert("Divisions", [
       {
         name: "OPERATIONAL",
-        code: "OP",
+        code: "OPR",
         createdAt: fn("NOW"),
         updatedAt: fn("NOW"),
       },
@@ -25,8 +25,14 @@ module.exports = {
         updatedAt: fn("NOW"),
       },
       {
-        name: "FINANCE ACCOUNTING",
-        code: "FA",
+        name: "FINANCE",
+        code: "FIN",
+        createdAt: fn("NOW"),
+        updatedAt: fn("NOW"),
+      },
+      {
+        name: "TAX & ACCOUNTING",
+        code: "ACC",
         createdAt: fn("NOW"),
         updatedAt: fn("NOW"),
       },
