@@ -19,7 +19,7 @@ module.exports = {
         updatedAt: fn("NOW"),
       },
       {
-        name: "INFORMATION TECHNOLOGY",
+        name: "IT",
         code: "IT",
         createdAt: fn("NOW"),
         updatedAt: fn("NOW"),

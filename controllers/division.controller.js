@@ -28,6 +28,7 @@ class DivisionController {
         offset:
           (Number(currentPage ? currentPage : 1) - 1) *
           (limit ? Number(limit) : 20),
+        order: [["id", "ASC"]],
       };
 
       const divisions = await Division.findAndCountAll(options);

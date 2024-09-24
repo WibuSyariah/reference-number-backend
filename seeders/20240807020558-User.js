@@ -16,6 +16,13 @@ module.exports = {
         createdAt: fn("NOW"),
         updatedAt: fn("NOW"),
       },
+      {
+        username: "admin",
+        password: hashPassword(env.ADMIN_PASSWORD),
+        role: "ADMIN",
+        createdAt: fn("NOW"),
+        updatedAt: fn("NOW"),
+      },
     ]);
   },
 

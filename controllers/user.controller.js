@@ -75,6 +75,16 @@ class UserController {
   static async update(req, res, next) {
     try {
       const { id } = req.params;
+
+      let user = await User.findOne({
+        where: { id },
+        attributes: ["id", "username", "role"],
+      });
+
+      if (user.role === "SUPERADMIN" && req.user.role !== "SUPERADMIN") {
+        throw new AppError("Forbidden", 403);
+      }
+
       const { fullName, newPassword, confirmPassword } = req.body;
       let hashedPassword = "";
       let updateData = {
@@ -95,11 +105,7 @@ class UserController {
         }
       }
 
-      await User.update(updateData, {
-        where: {
-          id,
-        },
-      });
+      await user.update(updateData);
 
       res.status(200).json({
         message: "Pengguna diperbarui",
@@ -150,7 +156,7 @@ class UserController {
       }
 
       user.destroy();
-      
+
       res.status(200).json({
         message: "Pengguna dihapus",
       });

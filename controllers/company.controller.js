@@ -29,6 +29,7 @@ class CompanyController {
         offset:
           (Number(currentPage ? currentPage : 1) - 1) *
           (limit ? Number(limit) : 20),
+        order: [["id", "ASC"]],
       };
 
       const companies = await Company.findAndCountAll(options);
