@@ -151,6 +151,10 @@ class UserController {
 
       const user = await User.findByPk(id);
 
+      if (user.role === "SUPERADMIN") {
+        throw new AppError("Forbidden", 403);
+      }
+
       if (!user) {
         throw new AppError("Pengguna tidak ditemukan", 404);
       }
