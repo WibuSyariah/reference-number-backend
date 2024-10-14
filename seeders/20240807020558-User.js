@@ -10,13 +10,6 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert("Users", [
       {
-        username: "superadmin",
-        password: hashPassword(env.SUPERADMIN_PASSWORD),
-        role: "SUPERADMIN",
-        createdAt: fn("NOW"),
-        updatedAt: fn("NOW"),
-      },
-      {
         username: "admin",
         password: hashPassword(env.ADMIN_PASSWORD),
         role: "ADMIN",
